@@ -1,59 +1,50 @@
-// Mobile Viewport Height
-const docHeight = () => {
-   const doc = document.documentElement;
-   doc.style.setProperty('--doc-height', `${window.innerHeight}px`);
-}
-window.addEventListener('resize', docHeight);
-docHeight()
-
-// Toggle Modal
-const body = document.body;
-const modal = document.querySelector('#modal');
-const addBtn = document.querySelector('#add-btn');
-const closeBtn = document.querySelector('#close-btn');
-let scrollY;
-
-const openModal = () => {
-   modal.classList.add('active');
-   scrollY = document.documentElement.style.getPropertyValue('--scroll-y');
-   body.style.position = 'fixed';
-   body.style.top = `-${scrollY}`;
-}
-
-const closeModal = () => {
-   scrollY = body.style.top;
-   body.style.position = '';
-   body.style.top = '';
-   window.scrollTo(0, parseInt(scrollY || '0') * -1);
-   modal.classList.remove('active');
-}
-
-window.addEventListener('scroll', () => {
-   document.documentElement.style.setProperty('--scroll-y', `${window.scrollY}px`);
-})
-
-addBtn.addEventListener('click', openModal);
-closeBtn.addEventListener('click', closeModal);
-
-// Textarea Resize
-const textarea = document.querySelector('#textarea');
-textarea.addEventListener('keyup', (e) => {
-   textarea.style.minheight = '32px';
-   let height = e.target.scrollHeight;
-   textarea.value == ''
-   ? textarea.style.height = '32px'
-   : textarea.style.height = `${height}px`;
-})
-
-// App Logic
-const taskInput = document.querySelector('#textarea');
+const body = document.querySelector('body');
+const scheme = window.matchMedia('(prefers-color-scheme: dark)');
+const currentTheme = localStorage.getItem('theme');
 const tabs = document.querySelectorAll('.tabs li');
-const checklist = document.querySelector('#checklist');
-const saveBtn = document.querySelector('#save-btn');
+const taskList = document.querySelector('.tasks');
+const modal = document.querySelector('.modal');
+const textarea = document.querySelector('#textarea');
+const themeBtn = document.querySelector('.theme-btn');
+const createBtn = document.querySelector('.create-btn');
+const closeBtn = document.querySelector('.close-btn');
+const submitBtn = document.querySelector('.submit-btn');
 
 let editId;
 let isEdited = false;
 let tasks = JSON.parse(localStorage.getItem('tasks'));
+
+if (currentTheme == 'dark') {
+   body.classList.toggle('dark');
+} else if (currentTheme == 'light') {
+   body.classList.toggle('light');
+}
+
+const openModal = () => {
+   modal.classList.add('visible');
+   body.style.position = 'fixed';
+}
+
+const closeModal = () => {
+   modal.classList.remove('visible');
+   body.style.position = 'relative';
+}
+
+const toggleTheme = () => {
+   if (scheme.matches) {
+      body.classList.toggle('light');
+      let theme = body.classList.contains('light')
+         ? 'light'
+         : 'dark';
+      localStorage.setItem('theme', theme);
+   } else {
+      body.classList.toggle('dark');
+      let theme = body.classList.contains('dark')
+         ? 'dark'
+         : 'light';
+      localStorage.setItem('theme', theme);
+   }
+}
 
 tabs.forEach(tab => {
    tab.addEventListener('click', () => {
@@ -63,54 +54,96 @@ tabs.forEach(tab => {
    })
 })
 
-function showTasks(tabs) {
+function showTasks(tab) {
    let li = '';
    if (tasks) {
       tasks.forEach((task, id) => {
-         let isComplete = task.status == 'complete'
-         ? 'checked'
-         : '';
-         if (tabs == task.status || tabs == 'pending') {
+         let completed = task.status == 'completed'
+            ? 'checked'
+            : '';
+         if (tab == task.status || tab == 'pending') {
             li += `
-            <li>
-               <input type="checkbox" onclick="updateStatus(this)" id="${id}" ${isComplete}>
-               <label for="${id}">${task.name}</label>
+            <li class="task">
+               <input type="checkbox" id="${id}" onclick="updateStatus(this)" ${completed}>
+               <label for="${id}">${task.description}</label>
+               <div class="task-controls">
+               <button class="more-btn" onclick="showMenu(this)"></button>
+                  <ul class="menu">
+                     <li onclick='editTask(${id}, "${task.description}")'>
+                        <button class="edit-btn">Edit</button>
+                     </li>
+                     <li onclick='deleteTask(${id}, "${tab}")'>
+                        <button class="delete-btn">Delete</button>
+                     </li>
+                  </ul>
+               </div>
             </li>
             `;
          }
-      })
+      });
    }
-   checklist.innerHTML = li || `<li>No tasks</li>`;
+   taskList.innerHTML = li || `<li>No tasks to display</li>`;
 }
 
 showTasks('pending');
 
-function updateStatus(task) {
-   task.checked
-   ? tasks[task.id].status = 'complete'
-   : task[task.id].status = 'pending';
+function showMenu(selectedTask) {
+   let menu = selectedTask.parentElement.lastElementChild;
+   menu.classList.add('show');
+   document.addEventListener('click', (e) => {
+      if (e.target.tagName != 'BUTTON' || e.target != selectedTask) {
+         menu.classList.remove('show');
+      }
+   })
+}
+
+function updateStatus(selectedTask) {
+   let task = selectedTask.parentElement.lastElementChild;
+   if (selectedTask.checked) {
+      task.classList.add('checked');
+      tasks[selectedTask.id].status = 'completed';
+   } else {
+      task.classList.remove('checked');
+      tasks[selectedTask.id].status = 'pending';
+   }
    localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
-saveBtn.addEventListener('click', () => {
-   let userTask = taskInput.value.trim();
+function editTask(taskId, text) {
+   editId = taskId;
+   isEdited = true;
+   textarea.value = text;
+   textarea.focus();
+}
+
+function deleteTask(deleteId, tab) {
+   isEdited = false;
+   tasks.splice(deleteId, 1);
+   localStorage.setItem('tasks', JSON.stringify(tasks));
+   showTasks(tab);
+}
+
+submitBtn.addEventListener('click', () => {
+   let userTask = textarea.value.trim();
    if (userTask) {
       if (!isEdited) {
-         if (!tasks) {
-            tasks = [];
-         }
+         tasks = !tasks ? [] : tasks;
          let taskInfo = {
-            name: userTask,
+            description: userTask,
             status: 'pending'
          };
          tasks.push(taskInfo);
       } else {
          isEdited = false;
-         tasks[editId].name = userTask;
+         tasks[editId].description = userTask;
       }
-      taskInput.value = '';
+      textarea.value = '';
       localStorage.setItem('tasks', JSON.stringify(tasks));
-      showTasks('pending');
-      closeModal();
+      showTasks(document.querySelector('li.active').id);
    }
+   closeModal();
 })
+
+themeBtn.addEventListener('click', toggleTheme);
+createBtn.addEventListener('click', openModal);
+closeBtn.addEventListener('click', closeModal);

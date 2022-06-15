@@ -4,45 +4,45 @@
    <meta charset="UTF-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <meta name="mobile-web-app-capable" content="yes">
-   <meta name="apple-mobile-web-app-title" content="To do application">
-   <meta name="apple-mobile-web-app-status-bar-style" content="#40484d">
    <meta name="theme-color" content="#40484d">
-   <meta name="description" content="To do application">
+   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#40484d">
+   <meta name="mobile-web-app-capable" content="yes">
+   <meta name="apple-mobile-web-app-capable" content="yes">
+   <meta name="apple-mobile-web-app-title" content="Tasks application">
+   <meta name="apple-mobile-web-app-status-bar-style" content="#40484d">
+   <meta name="description" content="Task application">
+   <title>Tasks</title>
+   <link rel="shortcut icon" href="favicon.ico">
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-   <title>To Do App</title>
-   <link rel="shortcut icon" href="favicon.ico">
-   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500&display=swap">
-   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-   <header class="header">
-      <div class="row">
-         <button class="theme-btn" id="theme-btn" type="button"><span class="material-symbols-outlined">light_mode</span></button>
-         <h2>To Do</h2>
-         <button class="avatar-btn" id="avatar-btn" type="button"><span class="material-symbols-outlined">account_circle</span></button>
-      </div>
+   <main>
+      <header>
+         <button class="theme-btn"></button>
+         <h1 class="heading">Tasks</h1>
+         <button class="image-btn"></button>
+      </header>
       <ul class="tabs">
          <li id="pending" class="active">Pending</li>
-         <li id="complete">Complete</li>
+         <li id="completed">Completed</li>
       </ul>
-   </header>
-   <main class="main">
-      <ul id="checklist" class="checklist"></ul>
+      <ul class="tasks"></ul>
+      <button class="create-btn"></button>
    </main>
-   <button class="add-btn" id="add-btn" type="button"><span class="material-symbols-outlined">add</span></button>
-   <aside class="modal" id="modal">
+   <aside class="modal">
       <div class="modal-inner">
          <div class="modal-header">
-            <button class="close-btn" id="close-btn" type="button"><span class="material-symbols-outlined">close</span></button>
-            <button class="save-btn" id="save-btn" type="button">Save</button>
+            <button class="close-btn"></button>
+            <button class="submit-btn">Save</button>
          </div>
          <div class="modal-body">
             <div class="textarea-control">
-               <textarea class="textarea" id="textarea" name="textarea" placeholder="Add to do"></textarea>
-               <label for="textarea">Add to do</label>
+               <textarea id="textarea" class="textarea" placeholder="Add task"></textarea>
+               <label for="textarea">Add task</label>
             </div>
          </div>
       </div>
